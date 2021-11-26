@@ -4,19 +4,32 @@ import { newsStorage } from "./storage.js";
 let news_id = JSON.parse(localStorage.getItem("news_id"));
 const news_page = document.querySelector("#news-page");
 
+// get news by its id
 const getNewsById = async () => {
-  const author_name = document.createElement("h1");
-  news_page.appendChild(author_name);
+  const author_details = document.createElement("div");
+  const author_name = document.createElement("h2");
+  const author_title = document.createElement("p");
+  const author_image = document.createElement("img");
+
+  news_page.appendChild(author_details);
+
+  author_details.appendChild(author_image);
+  author_details.appendChild(author_name);
+  author_details.appendChild(author_title);
 
   await apiCall.getRequest(`news/${news_id}`, (res) => {
     author_name.textContent = res.author;
+    author_title.textContent = res.title;
+    author_image.src = res.avatar;
   });
 };
 
+// get news images by id
 const getNewsImages = async () => {
   await apiCall.getRequest(`news/${news_id}/images`, (res) => {
     return res.map((data) => {
       const news_images_card = document.createElement("div");
+      news_images_card.setAttribute("class", "news-images");
 
       const news_image = document.createElement("img");
       news_image.src = data.image;
@@ -28,6 +41,7 @@ const getNewsImages = async () => {
   });
 };
 
+// get news comments by id
 const getNewsCommentsById = async () => {
   const news_comments = document.querySelector("#news-comments");
   await apiCall.getRequest(`news/${news_id}/comments`, (res) => {
@@ -39,6 +53,9 @@ const getNewsCommentsById = async () => {
 
       const author_image = document.createElement("img");
       author_image.src = data.avatar;
+
+      const comment_form = document.createElement("form");
+      comment_form.setAttribute("class", "comment_form");
 
       const comment_text = document.createElement("textarea");
       comment_text.value = data.comment;
@@ -61,8 +78,10 @@ const getNewsCommentsById = async () => {
       edit_comment_container.appendChild(edit_comment_btn);
       edit_comment_container.appendChild(update_comment_btn);
 
+      comment_form.appendChild(comment_text);
+
       comment_card.appendChild(author_name);
-      comment_card.appendChild(comment_text);
+      comment_card.appendChild(comment_form);
       comment_card.appendChild(author_image);
       comment_card.appendChild(delete_comment_btn);
       comment_card.appendChild(edit_comment_container);
@@ -105,16 +124,17 @@ const getNewsCommentsById = async () => {
 const deleteComment = async (id, message) => {
   await apiCall.deleteRequest(`news/${news_id}/comments/${id}`, message);
 };
+
 const postComment = document.querySelector("#form-add-comments");
 // delete a comment by its id
 const editComment = async (id, message) => {
-  const formData = new FormData(postComment).entries();
-  console.log(formData);
+  const comment = document.querySelector(".comment_form");
+  const formData = new FormData(comment).entries();
+
   await apiCall.postRequest(`news/${news_id}/comments/${75}`, "PUT", formData, message);
 };
 
 // post a comment
-
 postComment.addEventListener("submit", async (e) => {
   e.preventDefault();
   const formData = new FormData(postComment).entries();
