@@ -7,13 +7,12 @@ export const apiCall = {
       .then(getData)
       .catch((err) => console.log(err));
   },
-  postRequest(urlExt, postData, message) {
+  postRequest(urlExt, requestMethod, postData, message) {
     fetch(`${baseApiUrl}/${urlExt}`, {
-      method: "POST",
+      method: requestMethod,
       body: JSON.stringify(Object.fromEntries(postData)),
       headers: {
-        Accept: "application/json",
-        "Content-Type": "multipart/form-data",
+        "Content-Type": "application/json",
       },
     })
       .then((res) => res.json())

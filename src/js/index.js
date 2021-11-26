@@ -73,7 +73,7 @@ postNews.addEventListener("submit", async (e) => {
   // formData.append("avatar", avatar.files[0]);
   // formData.append("url", news_url.value);
 
-  await apiCall.postRequest("news", formData, "News Added Successfully");
+  await apiCall.postRequest("news", requestMethod, formData, "News Added Successfully");
 });
 
 // delete a news by its id

@@ -40,44 +40,85 @@ const getNewsCommentsById = async () => {
       const author_image = document.createElement("img");
       author_image.src = data.avatar;
 
-      const comment_text = document.createElement("input");
+      const comment_text = document.createElement("textarea");
       comment_text.value = data.comment;
+      comment_text.disabled = true;
 
       const delete_comment_btn = document.createElement("button");
       delete_comment_btn.textContent = "Delete";
 
+      const edit_comment_container = document.createElement("div");
+
+      const edit_comment_btn = document.createElement("button");
+      edit_comment_btn.textContent = "edit";
+
+      const update_comment_btn = document.createElement("button");
+      update_comment_btn.textContent = "update";
+      update_comment_btn.style.display = "none";
+
       news_comments.appendChild(comment_card);
+
+      edit_comment_container.appendChild(edit_comment_btn);
+      edit_comment_container.appendChild(update_comment_btn);
 
       comment_card.appendChild(author_name);
       comment_card.appendChild(comment_text);
       comment_card.appendChild(author_image);
       comment_card.appendChild(delete_comment_btn);
+      comment_card.appendChild(edit_comment_container);
+
+      // enable edit
+      edit_comment_btn.addEventListener("click", async () => {
+        await newsStorage.setItemToLocalStorage("comment_to_edit", data.id);
+        comment_text.disabled = false;
+        update_comment_btn.style.display = "block";
+        edit_comment_btn.style.display = "none";
+
+        // update_btn.addEventListener("click", () => console.log("hey"));
+        // editComment(JSON.parse(localStorage.getItem("comment_to_edit")), "comment edited successfully");
+      });
+
+      update_comment_btn.addEventListener("click", async () => {
+        // editComment();
+        await editComment("comment edited successfully");
+        update_comment_btn.style.display = "none";
+        edit_comment_btn.style.display = "block";
+        comment_text.disabled = true;
+      });
+
+      // edit comment
 
       // delete a comment by its id
-      delete_comment_btn.addEventListener("click", async (res) => {
-        await newsStorage.setItemToLocalStorage("comment_to_del", res.id);
-        // if (confirm(`Are you sure you want to delete it ?`)) {
-        //   deleteComment(JSON.parse(localStorage.getItem("comment_to_del_to_del")), "comment deleted successfully");
-        // } else {
-        //   null;
-        // }
+      delete_comment_btn.addEventListener("submit", async (res) => {
+        await newsStorage.setItemToLocalStorage("comment_to_del", data.id);
+        if (confirm(`Are you sure you want to delete it ?`)) {
+          deleteComment(JSON.parse(localStorage.getItem("comment_to_del")), "comment deleted successfully");
+        } else {
+          null;
+        }
       });
     });
   });
 };
 
-// delete a news by its id
+// delete a comment by its id
 const deleteComment = async (id, message) => {
-  const news_id = localStorage.getItem("news_id");
   await apiCall.deleteRequest(`news/${news_id}/comments/${id}`, message);
+};
+const postComment = document.querySelector("#form-add-comments");
+// delete a comment by its id
+const editComment = async (id, message) => {
+  const formData = new FormData(postComment).entries();
+  console.log(formData);
+  await apiCall.postRequest(`news/${news_id}/comments/${75}`, "PUT", formData, message);
 };
 
 // post a comment
-const postComment = document.querySelector("#form-add-comments");
+
 postComment.addEventListener("submit", async (e) => {
   e.preventDefault();
   const formData = new FormData(postComment).entries();
-  await apiCall.postRequest(`news/${news_id}/comments`, formData, "Comment Added Successfully");
+  await apiCall.postRequest(`news/${news_id}/comments`, "POST", formData, "Comment Added Successfully");
 });
 
 getNewsById();
